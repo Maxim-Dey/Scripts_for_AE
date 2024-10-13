@@ -10,14 +10,14 @@ var factor_upsc = 0;
 var rec_origin_d = 20;
 var add_nois = 1;
 var bg = true;
-var greate_mas = true;
+var create_mas = true;
 var use_simple_chok = true;
 var prec = true;
 var twix = true;
 //var settingsFile = new File(Folder.temp.fsName + "/fastTopazSettings.json"); // Save in system folder
 var settingsFile = new File(Folder($.fileName).parent.fsName + "/FastTopaz2AE_Resource/fastTopazSettings.json");
 var model_selection_for_interpolatifor_array = ["Apollo","Aion","ApolloFast","ChronosFast","Chronos"];
-var factor_slowmo_array = ["None","x1","x2","x3","x4","x6","x8","x10","x12","x14","x16"]; 
+var factor_slowmo_array = ["None","x2","x3","x4","x6","x8","x10","x12","x14","x16"]; 
 var model_selection_for_enhance_array = ["Proteus","Iris","Nyx","Artemis","Themis","DioneRobust","DioneRobustDehalo"];
 var factor_upscale_array = ["None","x2 Upscale","x4 Upscale"];
 
@@ -47,7 +47,7 @@ function main_ui(thisObj) {
         model_sel_interpolation.alignment = ["fill","top"]; 
         var factor_slowmo = interpolation.add("dropdownlist", undefined, undefined, {name: "factor_slowmo", items: factor_slowmo_array});
         factor_slowmo.alignment = ["fill","top"]; 
-        var remove_duplicates_frame = interpolation.add("checkbox", undefined, undefined, {name: "greate_mask"});
+        var remove_duplicates_frame = interpolation.add("checkbox", undefined, undefined, {name: "create_mask"});
         remove_duplicates_frame.text = "Remove Duplicates Frames";
         var value = interpolation.add("statictext", undefined, undefined, {name: "value"}); 
         value.alignment = ["fill", "top"]; value.text = "Sensitivity: 10"; 
@@ -83,8 +83,8 @@ function main_ui(thisObj) {
         // RENDER SETTINGS GROUP
         var render_settings = settings.add("panel", undefined, undefined, {name: "render_settings"}); 
         render_settings.text = "Render Settings"; render_settings.orientation = "column"; render_settings.alignChildren = ["left","top"]; render_settings.spacing = 10; render_settings.margins = 20; 
-        var greate_mask = render_settings.add("checkbox", undefined, undefined, {name: "greate_mask"}); 
-        greate_mask.text = "Save Alpha Channel"; 
+        var create_mask = render_settings.add("checkbox", undefined, undefined, {name: "create_mask"}); 
+        create_mask.text = "Save Alpha Channel"; 
         var use_simple_choker = render_settings.add("checkbox", undefined, undefined, {name: "use_simple_choker"}); 
         use_simple_choker.text = "Use Simple Choker"; 
         
@@ -116,7 +116,7 @@ function main_ui(thisObj) {
         rec_origin_det.onChanging = function() {value_1.text = "Recover Original Details: " + Math.round(rec_origin_det.value);}
         add_noise.onChanging = function() {value_2.text = "Add Noise: " + Math.round(add_noise.value);}
         factor_slowmo.onChange = function() {if (factor_slowmo.selection && factor_slowmo.selection.text === "None") {sensitivity.enabled = false;} else {sensitivity.enabled = true;}}
-        greate_mask.onClick = function() {if (!greate_mask.value) {use_simple_choker.enabled = false;} else {use_simple_choker.enabled = true;}}
+        create_mask.onClick = function() {if (!create_mask.value) {use_simple_choker.enabled = false;} else {use_simple_choker.enabled = true;}}
         precomp.onClick = function() {twixtor.enabled = true; timewarp.enabled = true;}
         pngsequence.onClick = function() {twixtor.enabled = false; timewarp.enabled = false;}
         quicktimeAnimation.onClick = function() {twixtor.enabled = false; timewarp.enabled = false;}
@@ -171,7 +171,7 @@ function main_ui(thisObj) {
                     rec_origin_det: Math.round(rec_origin_det.value),
                     add_noise: Math.round(add_noise.value),
                     bg: black.value ? "black" : (gray.value ? "gray" : "white"),
-                    greate_mask: greate_mask.value,
+                    create_mask: create_mask.value,
                     use_simple_choker: use_simple_choker.value,
                     finalCollect: precomp.value ? "precomp" : (quicktimeAnimation.value ? "quicktime" : "pngseq"),
                     effectForTimeControl: twixtor.value ? "twixtor" : "timewarp"
@@ -211,7 +211,7 @@ function main_ui(thisObj) {
             add_noise.value = add_nois;
             value_2.text = "Add Noise: " + add_nois;
             black.value = bg;
-            greate_mask.value = greate_mas;
+            create_mask.value = create_mas;
             use_simple_choker.value =  use_simple_chok;
             precomp.value = prec;
             twixtor.value = twix;
@@ -235,9 +235,9 @@ function main_ui(thisObj) {
             black.value = loadedSettings.bg === "black";
             gray.value = loadedSettings.bg === "gray";
             white.value = loadedSettings.bg === "white";
-            greate_mask.value = loadedSettings.greate_mask;
+            create_mask.value = loadedSettings.create_mask;
             use_simple_choker.value = loadedSettings.use_simple_choker;
-            if (!greate_mask.value) {use_simple_choker.enabled = false;}
+            if (!create_mask.value) {use_simple_choker.enabled = false;}
             precomp.value = loadedSettings.finalCollect === "precomp";
             quicktimeAnimation.value = loadedSettings.finalCollect === "quicktime";
             pngsequence.value = loadedSettings.finalCollect === "pngseq";
@@ -299,20 +299,19 @@ function start_render(p) {
     // Разворачивает входящий атрибут в переменные
     // For Interpolation
     var model_sel_interpolation = p.model_sel_interpolation + 1;
-    var sel_slowmo = p.factor_slowmo + 1;
+    var sel_slowmo = p.factor_slowmo == 0 ? p.factor_slowmo + 1 : p.factor_slowmo + 2;
     var factor_slowmo;
     switch (p.factor_slowmo) {
         case 0: factor_slowmo = 1; break;
-        case 1: factor_slowmo = 1; break;
-        case 2: factor_slowmo = 2; break;
-        case 3: factor_slowmo = 3; break;
-        case 4: factor_slowmo = 4; break;
-        case 5: factor_slowmo = 6; break;
-        case 6: factor_slowmo = 8; break;
-        case 7: factor_slowmo = 10; break;
-        case 8: factor_slowmo = 12; break;
-        case 9: factor_slowmo = 14; break;
-        case 10: factor_slowmo = 16; break;
+        case 1: factor_slowmo = 2; break;
+        case 2: factor_slowmo = 3; break;
+        case 3: factor_slowmo = 4; break;
+        case 4: factor_slowmo = 6; break;
+        case 5: factor_slowmo = 8; break;
+        case 6: factor_slowmo = 10; break;
+        case 7: factor_slowmo = 12; break;
+        case 8: factor_slowmo = 14; break;
+        case 9: factor_slowmo = 16; break;
     }
     var sensitivity = p.sensitivity;
     var remove_dublic = p.remove_dublic;
@@ -329,7 +328,7 @@ function start_render(p) {
     var add_noise = p.add_noise;
     // For Rendering
     var bg = p.bg;
-    var greate_mask = p.greate_mask;
+    var create_mask = p.create_mask;
     var use_simple_choker = p.use_simple_choker;
     var finalCollect = p.finalCollect;
     var effectForTimeControl = p.effectForTimeControl;
@@ -363,7 +362,7 @@ function start_render(p) {
         app.purge(PurgeTarget.ALL_MEMORY_CACHES);
 
         // Create Mask
-        if (greate_mask) {
+        if (create_mask) {
             var comp_m = app.project.items.addComp("M_" + oneItem.name, oneItem.width, oneItem.height, oneItem.pixelAspect, oneItem.duration, oneItem.frameRate);
             comp_m.parentFolder = itemFolder;
             var layer_m = comp_m.layers.add(oneItem);
@@ -371,12 +370,11 @@ function start_render(p) {
             layer_m.timeRemapEnabled = true;
             layer_m.outPoint = comp_m.duration;
             add_shape(comp_m, "black", false, "BG");
-            var mask = renderComp(comp_m, assetsFolder, "png");
+            var mask = renderComp(comp_m, assetsFolder, "mov");
             app.purge(PurgeTarget.ALL_MEMORY_CACHES);
         }
-
         // Create Beauty from Topaz Interpolation and Upscale Renders 
-        if (sel_slowmo > 1 && check_int && topazDone) {
+        if (factor_slowmo > 1 && check_int && topazDone) {
             var comp_b_interpolation = createForTopazInterpolation(beauty, itemFolder, factor_slowmo, sel_slowmo, model_sel_interpolation, sensitivity, remove_dublic);
             do {
                 if (beauty_topaz_interp) {
@@ -384,12 +382,35 @@ function start_render(p) {
                     cleaner(beauty_topaz_interp);
                     if (!topazDone) {break;}
                 }
-                if (finalCollect === "precomp") {var beauty_topaz_interp = renderComp(comp_b_interpolation, assetsFolder, "mov");}
-                else {var beauty_topaz_interp = renderComp(comp_b_interpolation, assetsFolder, "png");}      
-                app.purge(PurgeTarget.ALL_MEMORY_CACHES);
-            } while (beauty_topaz_interp.duration != beauty.duration*factor_slowmo);
 
-            if (model_sel_enhance > 1 && check_ups && topazDone) {
+                if (finalCollect === "precomp") {
+                    alert(factor_upscale);
+                    if (factor_upscale == 1) {
+                        var beauty_topaz_interp = renderComp(comp_b_interpolation, assetsFolder, "mov");
+                        alert(beauty_topaz_interp.name);
+                    } else {
+                        var beauty_topaz_interp = renderComp(comp_b_interpolation, assetsFolder, "png");
+                    }
+                } else if (finalCollect === "quicktime") {
+                    if (factor_upscale == 1 && !create_mask) {
+                        var beauty_topaz_interp = renderComp(comp_b_interpolation, assetsFolder, "mov");
+                    } else if (factor_upscale == 1 && create_mask) {
+                        var beauty_topaz_interp = renderComp(comp_b_interpolation, assetsFolder, "png");
+                    } else if (factor_upscale > 1) {
+                        var beauty_topaz_interp = renderComp(comp_b_interpolation, assetsFolder, "png");
+                    }    
+                } else if (finalCollect === "pngseq")  {
+                    var beauty_topaz_interp = renderComp(comp_b_interpolation, assetsFolder, "png");
+                }
+
+                app.purge(PurgeTarget.ALL_MEMORY_CACHES);
+            } while (beauty_topaz_interp.duration == beauty.duration*factor_slowmo);
+
+            alert(beauty.duration*factor_slowmo);
+            alert(beauty_topaz_interp.duration);
+            return;
+
+            if (factor_upscale > 1 && check_ups && topazDone) {
                 var comp_b_upscale = createForTopazUpscale(beauty_topaz_interp, itemFolder, factor_upscale, sel_upscale, model_sel_enhance, rec_origin_det, add_noise);
                 do {
                     if (beauty_topaz_upscl) {
@@ -397,29 +418,49 @@ function start_render(p) {
                         cleaner(beauty_topaz_upscl);
                         if (!topazDone) {break;}
                     }
-                    if (finalCollect === "precomp") {var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "mov");}
-                    else {var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "png");}
+
+                    if (finalCollect === "precomp") {
+                        var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "mov");
+                    } else if (finalCollect === "quicktime") { 
+                        if (!create_mask) {
+                            var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "mov");
+                        } else {
+                            var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "png");
+                        }
+                    } else if (finalCollect === "pngseq") {
+                        var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "png");
+                    }
+
                     app.purge(PurgeTarget.ALL_MEMORY_CACHES); 
                 } while (beauty_topaz_upscl.duration != beauty_topaz_interp.duration);
             } 
-        } else {
-            if (model_sel_enhance > 1 && check_ups && topazDone) {
-                var comp_b_upscale = createForTopazUpscale(beauty, itemFolder, factor_upscale, sel_upscale, model_sel_enhance, rec_origin_det, add_noise);
-                do {
-                    if (beauty_topaz_upscl) {
-                        topazDone = topazF(beauty_topaz_upscl.name, "Upscale");
-                        cleaner(beauty_topaz_upscl);
-                        if (!topazDone) {break;}
+        } else if (factor_upscale > 1 && check_ups && topazDone) {
+            var comp_b_upscale = createForTopazUpscale(beauty, itemFolder, factor_upscale, sel_upscale, model_sel_enhance, rec_origin_det, add_noise);
+            do {
+                if (beauty_topaz_upscl) {
+                    topazDone = topazF(beauty_topaz_upscl.name, "Upscale");
+                    cleaner(beauty_topaz_upscl);
+                    if (!topazDone) {break;}
+                }
+
+                if (finalCollect === "precomp") {
+                    var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "mov");
+                } else if (finalCollect === "quicktime") { 
+                    if (!create_mask) {
+                        var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "mov");
+                    } else {
+                        var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "png");
                     }
-                    if (finalCollect === "precomp") {var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "mov");}
-                    else {var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "png");}
-                    app.purge(PurgeTarget.ALL_MEMORY_CACHES); 
-                } while (beauty_topaz_upscl.duration != beauty.duration);
-            } 
+                } else if (finalCollect === "pngseq") {
+                    var beauty_topaz_upscl = renderComp(comp_b_upscale, assetsFolder, "png");
+                }
+
+                app.purge(PurgeTarget.ALL_MEMORY_CACHES); 
+            } while (beauty_topaz_upscl.duration != beauty.duration);
         }
 
         // Create Mask from Topaz Interpolation and Upscale Renders
-        if (greate_mask && topazDone) {
+        if (create_mask && topazDone) {
             if (sel_slowmo > 1 && check_int && topazDone) {
                 var comp_m_interpolation = createForTopazInterpolation(mask, itemFolder, factor_slowmo, sel_slowmo, model_sel_interpolation, sensitivity, remove_dublic);
                 do {
@@ -428,12 +469,11 @@ function start_render(p) {
                         cleaner(mask_topaz_interp);
                         if (!topazDone) {break;}
                     }
-                    if (finalCollect === "precomp") {var mask_topaz_interp = renderComp(comp_m_interpolation, assetsFolder, "mov");}
-                    else {var mask_topaz_interp = renderComp(comp_m_interpolation, assetsFolder, "png");}
+                    var mask_topaz_interp = renderComp(comp_m_interpolation, assetsFolder, "mov");
                     app.purge(PurgeTarget.ALL_MEMORY_CACHES);
                 } while (mask_topaz_interp.duration != mask.duration*factor_slowmo);
 
-                if (model_sel_enhance > 1 && check_ups && topazDone) {
+                if (sel_upscale > 1 && check_ups && topazDone) {
                     var comp_m_upscale = createForTopazUpscale(mask_topaz_interp, itemFolder, factor_upscale, sel_upscale, model_sel_enhance, rec_origin_det, add_noise);
                     do {
                         if (mask_topaz_upscl) {
@@ -441,13 +481,12 @@ function start_render(p) {
                             cleaner(mask_topaz_upscl);
                             if (!topazDone) {break;}
                         }
-                        if (finalCollect === "precomp") {var mask_topaz_upscl = renderComp(comp_m_upscale, assetsFolder, "mov");}
-                        else {var mask_topaz_upscl = renderComp(comp_m_upscale, assetsFolder, "png");}                        
+                        var mask_topaz_upscl = renderComp(comp_m_upscale, assetsFolder, "mov");                       
                         app.purge(PurgeTarget.ALL_MEMORY_CACHES); 
                     } while (mask_topaz_upscl.duration != mask_topaz_interp.duration);
                 }
             } else {
-                if (model_sel_enhance > 1 && check_ups && topazDone) {
+                if (sel_upscale > 1 && check_ups && topazDone) {
                     var comp_m_upscale = createForTopazUpscale(mask, itemFolder, factor_upscale, sel_upscale, model_sel_enhance, rec_origin_det, add_noise);
                     do {   
                         if (mask_topaz_upscl) {
@@ -455,8 +494,7 @@ function start_render(p) {
                             cleaner(mask_topaz_upscl);
                             if (!topazDone) {break;}
                         }
-                        if (finalCollect === "precomp") {var mask_topaz_upscl = renderComp(comp_m_upscale, assetsFolder, "mov");}
-                        else {var mask_topaz_upscl = renderComp(comp_m_upscale, assetsFolder, "png");}                        
+                        var mask_topaz_upscl = renderComp(comp_m_upscale, assetsFolder, "mov");                     
                         app.purge(PurgeTarget.ALL_MEMORY_CACHES); 
                     } while (mask_topaz_upscl.duration != mask.duration);
                 }
@@ -474,40 +512,36 @@ function start_render(p) {
         if(comp_m_upscale) {cleaner(comp_m_upscale);}
         if(beauty_topaz_upscl) {if(beauty_topaz_interp) {cleaner(beauty_topaz_interp);}}
         if(mask_topaz_upscl) {if(mask_topaz_interp) {cleaner(mask_topaz_interp);}}
-        if (!topazDone) {oneItem.parentFolder = itemFolder.parentFolder; itemFolder.remove(); continue;}
-
-        // Final collect if need composition
-        if (finalCollect === "precomp" && !greate_mask) {
-            if (beauty_topaz_upscl) {
-                var prefixName = model_selection_for_enhance_array[model_sel_enhance-1] + "X" + factor_slowmo + "_" + model_selection_for_interpolatifor_array[model_sel_interpolation-1] + "X" + factor_slowmo + "_";
-                var compFinal = finalCollectRender(beauty_topaz_upscl, greate_mask, oneItem, use_simple_choker, effectForTimeControl, finalCollect, prefixName);
-            } else if (beauty_topaz_interp) {
-                var prefixName = model_selection_for_interpolatifor_array[model_sel_interpolation-1] + "X" + factor_slowmo + "_";
-                var compFinal = finalCollectRender(beauty_topaz_interp, greate_mask, oneItem, use_simple_choker, effectForTimeControl, finalCollect, prefixName);
-            } 
+        if (!topazDone) {
+            if(beauty_topaz_interp) {cleaner(beauty_topaz_interp);}
+            if(mask_topaz_interp) {cleaner(mask_topaz_interp);}
+            oneItem.parentFolder = itemFolder.parentFolder; itemFolder.remove(); 
+            continue;
         }
 
-        if (finalCollect === "precomp" && greate_mask) {
+        // Final collect if need quicktime.mov or sequence.png WITHOUT alfa channel
+        if ((finalCollect === "quicktime" || finalCollect === "pngseq") && !create_mask) {
             if (beauty_topaz_upscl) {
-                var prefixName = model_selection_for_enhance_array[model_sel_enhance-1] + "X" + factor_slowmo + "_" + model_selection_for_interpolatifor_array[model_sel_interpolation-1] + "X" + factor_slowmo + "_";
-                var compFinal = finalCollectRender(beauty_topaz_upscl, mask_topaz_upscl, oneItem, use_simple_choker, effectForTimeControl, finalCollect, prefixName);
+                var prefixName = model_selection_for_enhance_array[model_sel_enhance-2] + "X" + factor_upscale + "_" + model_selection_for_interpolatifor_array[model_sel_interpolation-1] + "X" + factor_slowmo + "_";
+                beauty_topaz_upscl.name = "TopazAI_" + prefixName + oneItem.name; 
             } else if (beauty_topaz_interp) {
                 var prefixName = model_selection_for_interpolatifor_array[model_sel_interpolation-1] + "X" + factor_slowmo + "_";
-                var compFinal = finalCollectRender(beauty_topaz_interp, mask_topaz_interp, oneItem, use_simple_choker, effectForTimeControl, finalCollect, prefixName);
-            } 
+                beauty_topaz_interp.name = "TopazAI_" + prefixName + oneItem.name;
+            }
+            continue;
         }
 
-        // Final collect if need movie
-        if (finalCollect === "quicktime" && !greate_mask) {continue;}
-        if (finalCollect === "pngseq" && !greate_mask) {continue;}
-        if (finalCollect !== "precomp" && greate_mask) {
-            if (beauty_topaz_upscl) {
-                var prefixName = model_selection_for_enhance_array[model_sel_enhance-2] + "X" + factor_slowmo + "_" + model_selection_for_interpolatifor_array[model_sel_interpolation-1] + "X" + factor_slowmo + "_";
-                var compFinal = finalCollectRender(beauty_topaz_upscl, mask_topaz_upscl, oneItem, use_simple_choker, effectForTimeControl, finalCollect, prefixName);
-            } else if (beauty_topaz_interp) {
-                var prefixName = model_selection_for_interpolatifor_array[model_sel_interpolation-1] + "X" + factor_slowmo + "_";
-                var compFinal = finalCollectRender(beauty_topaz_interp, mask_topaz_interp, oneItem, use_simple_choker, effectForTimeControl, finalCollect, prefixName);
-            } 
+        // Final collect if need pre-composition
+        if (beauty_topaz_upscl) {
+            var prefixName = model_selection_for_enhance_array[model_sel_enhance-2] + "X" + factor_upscale + "_" + model_selection_for_interpolatifor_array[model_sel_interpolation-1] + "X" + factor_slowmo + "_";
+            var compFinal = finalCollectRender(beauty_topaz_upscl, mask_topaz_upscl, oneItem, use_simple_choker, effectForTimeControl, finalCollect, prefixName);
+        } else if (beauty_topaz_interp) {
+            var prefixName = model_selection_for_interpolatifor_array[model_sel_interpolation-1] + "X" + factor_slowmo + "_";
+            var compFinal = finalCollectRender(beauty_topaz_interp, mask_topaz_interp, oneItem, use_simple_choker, effectForTimeControl, finalCollect, prefixName);
+        } 
+
+        // Final collect if need quicktime.mov or sequence.png WITH alfa channel
+        if (finalCollect !== "precomp" && create_mask) { 
             if (finalCollect === "quicktime") {var movFinal = renderComp(compFinal.comp, assetsFolder, "mov");}
             if (finalCollect === "pngseq") {var pngFinal = renderComp(compFinal.comp, assetsFolder, "png");}
             cleaner(compFinal.comp);
@@ -516,6 +550,7 @@ function start_render(p) {
             if(compFinal.folder) {cleaner(compFinal.folder);}
         }
     }
+    app.purge(PurgeTarget.ALL_MEMORY_CACHES);
 }
 
 ///////////////////////////////////
@@ -612,6 +647,9 @@ function renderComp(comp, assetsFolder, type) {
     }
     var importedItem = app.project.importFile(importOptions);
     importedItem.parentFolder = comp.parentFolder;
+    if (type === "png") {
+        importedItem.mainSource.conformFrameRate = comp.frameRate;
+    }
     return importedItem;
 }
 
