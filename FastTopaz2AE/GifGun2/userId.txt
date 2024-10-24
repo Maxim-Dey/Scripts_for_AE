@@ -1,5 +1,0 @@
-{
-    "userId": "4cfa1fc4-74ca-4033-8ca9-0d2efff242a1",
-    "panelEnabled": false,
-    "ingestEnabled": false
-}
