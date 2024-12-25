@@ -1,5 +1,5 @@
 # Scripts_for_AE
-## 1.TopazFlowAE
+## 1. TopazFlowAE
 Данный скрипт позволяет автоматизировать работу плагинов Topaz Video AI в After Effects.
 Основная цель — сохранение альфа-канала у кадров, обработанных нейросетями Topaz.
 
